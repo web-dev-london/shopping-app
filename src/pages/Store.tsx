@@ -1,28 +1,36 @@
-import { Grid, GridItem } from "@chakra-ui/react";
+import { Wrap, WrapItem } from "@chakra-ui/react";
+import Clink from "clink-react";
 import CartView from "../components/CartView";
-import { useFetchAndValidate } from "../hooks/useFetchAndValidate";
+import CategoriesView from "../components/CategoriesView";
+import { useShoppingCart } from "../context/shoppingCartContext";
+import useProducts from "../hooks/useProducts";
 
 const Store = () => {
-    const { data, } = useFetchAndValidate(`https://dummyjson.com/carts?skip=10&limit=3`)
+    const { query } = useShoppingCart()
+    const { data: result } = useProducts(query)
 
-
-    const carts = data?.carts && data.carts.map(item => {
+    const products = result?.products && result.products.map(product => {
         return (
-            <GridItem
-                key={item.id}
+            <WrapItem
+                key={product.id}
             >
-                <CartView products={item.products} />
-            </GridItem>
+                <Clink to={`/details/${product.id}`}>
+                    <CartView product={product} />
+                </Clink>
+            </WrapItem>
         )
     })
 
     return (
         <>
-            <Grid
-                rowGap={4}
+            <Wrap
+                spacing={4}
+                justify='center'
+                align='center'
             >
-                {carts}
-            </Grid>
+                <CategoriesView />
+                {products}
+            </Wrap>
         </>
     )
 }

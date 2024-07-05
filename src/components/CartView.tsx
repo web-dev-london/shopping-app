@@ -1,38 +1,36 @@
-import { Button, ButtonGroup, Card, CardBody, CardFooter, CardHeader, Divider, Heading, Image, SimpleGrid, Stack, Text } from "@chakra-ui/react"
-import { useContext } from "react"
-import { ShoppingCartContext } from "../context/ShoppingCartContext"
-import { ItemsCart } from "../utils/fetchAndValidateData"
+import { Button, ButtonGroup, Card, CardBody, CardFooter, CardHeader, Divider, Heading, Image, Stack, Text } from "@chakra-ui/react"
 import { formatCurrency } from "../utils/formatCurrency"
+import { Product } from "../utils/validateData"
+import { useShoppingCart } from "../context/shoppingCartContext"
 
 const CartView = (props: {
-    products: ItemsCart
+    product: Product
 }) => {
-    const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } = useContext(ShoppingCartContext)
+    const { getItemQuantity, increaseCartQuantity, decreaseCartQuantity, removeFromCart } = useShoppingCart();
 
-
-    const productItem = props.products.map(product => {
-        const quantity = getItemQuantity(product.id)
-        return (
+    const quantity = getItemQuantity(props.product.id)
+    return (
+        <>
             <Card
-                key={product.id}
                 maxW={'md'}
             >
                 <CardHeader
                 >
+
                     <Image
-                        src={product.thumbnail}
-                        alt={product.title}
+                        src={props.product.thumbnail}
+                        alt={props.product.title}
                         borderRadius={'lg'}
                     />
                 </CardHeader>
                 <CardBody>
                     <Stack mt='6' spacing='3'>
-                        <Heading size={'md'}>{product.title}</Heading>
+                        <Heading size={'md'}>{props.product.title}</Heading>
                         <Text>
-                            Product quantity:  {product.quantity}
+                            Product Description:  {props.product.description}
                         </Text>
                         <Text color='blue.600' fontSize='2xl'>
-                            {formatCurrency(product.price)}
+                            {formatCurrency(props.product.price)}
                         </Text>
                     </Stack>
                 </CardBody>
@@ -40,40 +38,52 @@ const CartView = (props: {
                 <CardFooter>
                     {quantity === 0 ? (
                         <Button
-                            onClick={() => increaseCartQuantity(product.id)}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                increaseCartQuantity(props.product.id)
+                            }}
                             colorScheme="blue"
-                        >+ Add to Cart</Button>
+                        >
+                            + Add to Cart
+                        </Button>
                     ) : <ButtonGroup spacing='2'>
                         <Button
-                            onClick={() => decreaseCartQuantity(product.id)}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                decreaseCartQuantity(props.product.id)
+                            }}
                             colorScheme='blue'>
                             -
                         </Button>
                         <Text as={'span'}>{quantity}</Text>
-                        <Text as={'span'}>in cart</Text>
+                        <Text as={'span'}
+                        >
+                            in cart
+                        </Text>
                         <Button
-                            onClick={() => increaseCartQuantity(product.id)}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                increaseCartQuantity(props.product.id)
+                            }}
                             colorScheme='blue'>
                             +
                         </Button>
                         <Button
-                            onClick={() => removeFromCart(product.id)}
-                            colorScheme="red" >Remove</Button>
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                removeFromCart(props.product.id)
+                            }}
+                            colorScheme="red"
+                        >
+                            Remove
+                        </Button>
                     </ButtonGroup>}
                 </CardFooter>
             </Card>
-        )
-    })
-
-    return (
-        <>
-            <SimpleGrid
-                spacing={4}
-                columns={{
-                    sm: 1, md: 2, lg: 3, xl: 4
-                }}>
-                {productItem}
-            </SimpleGrid>
         </>
     )
 }

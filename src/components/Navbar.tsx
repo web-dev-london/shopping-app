@@ -1,11 +1,12 @@
-import { Box, Button, Container, List, ListItem } from "@chakra-ui/react"
-import Clink from "clink-react"
-import { useContext } from "react";
+import { Box, Button, Container, Input, List, ListItem } from "@chakra-ui/react";
+import Clink from "clink-react";
+import { useRef } from "react";
 import { PiShoppingCartThin } from "react-icons/pi";
-import { ShoppingCartContext } from "../context/ShoppingCartContext";
+import { useShoppingCart } from "../context/shoppingCartContext";
 
 const Navbar = () => {
-    const { openCart, cartTotal } = useContext(ShoppingCartContext)
+    const { openCart, cartTotal, onSearch } = useShoppingCart()
+    const ref = useRef<HTMLInputElement>(null)
 
     return (
         <>
@@ -40,7 +41,22 @@ const Navbar = () => {
                             <Clink to='/store'>Store</Clink>
                         </ListItem>
                     </List>
-                    {cartTotal > 0 && <Button
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            if (ref.current) {
+                                onSearch(ref.current.value)
+                            }
+                        }}
+                        style={{
+                            marginRight: '1rem'
+                        }}
+                    >
+                        <Input
+                            ref={ref}
+                            placeholder="Search" />
+                    </form>
+                    <Button
                         onClick={openCart}
                         bg={'blue.300'}
                         p={'0'}
@@ -56,7 +72,7 @@ const Navbar = () => {
                         >
                             {cartTotal}
                         </Box>
-                    </Button>}
+                    </Button>
                 </Container>
             </Box>
         </>

@@ -1,17 +1,17 @@
-import { useContext } from 'react';
-import { ShoppingCartContext } from '../context/ShoppingCartContext';
-import { ItemsCart } from '../utils/fetchAndValidateData';
-import { Heading, Card, Image, Stack, CardBody, CardFooter, Button, Text, VStack } from '@chakra-ui/react';
+import { Button, Card, CardBody, CardFooter, Heading, Image, Stack, Text, VStack } from '@chakra-ui/react';
+import { useShoppingCart } from '../context/shoppingCartContext';
 import { formatCurrency } from '../utils/formatCurrency';
+import { Product } from '../utils/validateData';
 
 const ProductItem = (props: {
     id: number;
     quantity: number;
-    product: ItemsCart;
+    product: Product;
 }) => {
-    const { removeFromCart } = useContext(ShoppingCartContext);
+    const { removeFromCart } = useShoppingCart();
 
-    const item = props.product.find(i => i.id === props.id);
+
+    const item = props.product.id === props.id;
 
 
     if (item === undefined) return null;
@@ -25,13 +25,13 @@ const ProductItem = (props: {
                 <Image
                     objectFit='cover'
                     maxW={{ base: '100%', sm: '300px' }}
-                    src={item?.thumbnail}
-                    alt={item?.title}
+                    src={props.product.thumbnail}
+                    alt={props.product.title}
                 />
 
                 <Stack>
                     <CardBody>
-                        <Heading size='md'>{item?.title}</Heading>
+                        <Heading size='md'>{props.product.title}</Heading>
                         <VStack>
                             {props.quantity > 1 &&
                                 <Text as={'span'} py='2'>
@@ -39,14 +39,14 @@ const ProductItem = (props: {
                                 </Text>
                             }
                         </VStack>
-                        {formatCurrency(item.price)}
+                        {formatCurrency(props.product.price)}
                     </CardBody>
 
                     <CardFooter>
 
-                        Total {formatCurrency(item.price * props.quantity)}
+                        Total {formatCurrency(props.product.price * props.quantity)}
                         <Button
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => removeFromCart(props.product.id)}
                             p={0}
                         >
                             &times;

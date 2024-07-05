@@ -1,36 +1,33 @@
-import { createContext, ReactNode, useState } from 'react';
-import ShoppingCart from '../ShoppingCart';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { ReactNode, useState } from "react";
+import useLocalStorage from "../hooks/useLocalStorage";
+import useProducts from "../hooks/useProducts";
+import ShoppingCart from "../ShoppingCart";
+import { Category } from "../utils/validateData";
+import { CartItems, ProductQuery, shoppingCartContext } from "./shoppingCartContext";
 
-interface CartProvider {
+interface ShoppingCartProviderProps {
     children: ReactNode;
 }
 
-interface ShoppingCartContext {
-    openCart: () => void;
-    closeCart: () => void;
-    getItemQuantity: (id: number) => number;
-    increaseCartQuantity: (id: number) => void;
-    decreaseCartQuantity: (id: number) => void;
-    removeFromCart: (id: number) => void;
-    cartTotal: number;
-    cartItem: CartItem[];
-}
-
-interface CartItem {
-    id: number;
-    quantity: number;
-}
-
-export const ShoppingCartContext = createContext({} as ShoppingCartContext)
-
-
-const ShoppingCartProvider = ({ children }: CartProvider) => {
+const ShoppingCartProvider = ({ children }: ShoppingCartProviderProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [cartItem, setCartItem] = useLocalStorage<CartItem[]>('shopping-cart', []);
+    const [cartItems, setCartItem] = useLocalStorage<CartItems[]>('shopping-cart', []);
+    const [query, setQuery] = useState<ProductQuery>({})
+    const { data: result } = useProducts(query);
+    console.log('Query', query);
+
+
+    function onSearch(searchText: string) {
+        setQuery({ ...query, searchText })
+    }
+
+    function onSelectCategory(categories: Category | undefined) {
+        setQuery({ ...query, category: categories })
+    }
+
 
     const getItemQuantity = (id: number) => {
-        return cartItem.find(item => item.id === id)?.quantity || 0
+        return cartItems.find(item => item.id === id)?.quantity || 0
     }
 
     const increaseCartQuantity = (id: number) => {
@@ -74,23 +71,27 @@ const ShoppingCartProvider = ({ children }: CartProvider) => {
     const openCart = () => setIsOpen(!isOpen);
     const closeCart = () => setIsOpen(!isOpen)
 
-    const cartTotal = cartItem.reduce((result, current) => current.quantity + result, 0)
+    const cartTotal = cartItems.reduce((result, current) => result + current.quantity, 0)
 
     return (
-        <ShoppingCartContext.Provider value={
+        <shoppingCartContext.Provider value={
             {
+                onSelectCategory,
+                onSearch,
+                query,
+                result,
                 getItemQuantity,
                 increaseCartQuantity,
                 decreaseCartQuantity,
                 removeFromCart,
                 openCart,
                 closeCart,
-                cartItem,
+                cartItems,
                 cartTotal,
             }}>
             {children}
             <ShoppingCart isOpen={isOpen} />
-        </ShoppingCartContext.Provider>
+        </shoppingCartContext.Provider>
     )
 }
 export default ShoppingCartProvider;
